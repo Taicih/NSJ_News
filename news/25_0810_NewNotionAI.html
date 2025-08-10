@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新Notion AI 進化のインタラクティブガイド</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: このSPAは、トップナビゲーションを持つ単一ページのテーマ別セクションで構成されています。構成は「概要」「機能比較」「データベース操作」「現在の制限」です。「機能比較」セクションでは、ユーザーがボタンをクリックすることで表示される情報を切り替えられる対話的な体験を提供します。この構造は、ユーザーが情報を段階的に、かつ自分の興味に応じて探索できるように設計されており、静的なスライドよりも高いエンゲージメントと理解を促進します。 -->
+    <!-- Visualization & Content Choices: 1. **概要**: 新旧AIの能力を概念的に示すインタラクティブな横棒グラフ(Chart.js)を使用。視覚的な要約により、全体の進化を一目で把握できます。 2. **機能比較**: トピックボタン（UI、検索など）と、動的に内容が更新される2カラムのテキスト表示(JS)を組み合わせ、ユーザー主導の詳細な比較を可能にします。 3. **データベース操作**: HTML/Tailwindで作成したシンプルなフロー図で、新しいワークフローを視覚的に説明します。 4. **現在の制限**: Unicodeアイコン付きのクリーンなリストで、明確かつ簡潔に情報を提供します。これらの選択は、SVGやMermaid JSを使用せず、レポートの質的な情報を効果的に伝えるためのものです。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #D97706;
+            border-bottom-color: #D97706;
+        }
+        .comparison-button {
+            transition: all 0.3s ease;
+        }
+        .comparison-button.active {
+            background-color: #FBBF24;
+            color: #422006;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #old-content ul, #new-content ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+        #old-content li, #new-content li {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        #old-content li:before, #new-content li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #D97706;
+        }
+        #old-content li:before {
+            color: #6B7280;
+            content: "-";
+        }
+        #new-content li:before {
+            color: #D97706;
+            content: "✓";
+        }
+        .bold-orange {
+            font-weight: 700;
+            color: #F97316;
+        }
+        .bold-yellow {
+            font-weight: 700;
+            color: #EAB308;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">Notion AI 進化ガイド</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link font-medium text-gray-600 pb-1">概要</a>
+                <a href="#comparison" class="nav-link font-medium text-gray-600 pb-1">機能比較</a>
+                <a href="#database" class="nav-link font-medium text-gray-600 pb-1">データベース操作</a>
+                <a href="#limitations" class="nav-link font-medium text-gray-600 pb-1">現在の制限</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="mb-24 text-center scroll-mt-20">
+            <h2 class="text-4xl font-bold mb-4 text-gray-900">アシスタントから、チームメイトへ</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-6">
+                新しいNotion AIは、単なる文章作成ツールから、Notion上のあらゆる作業を自律的にこなす強力なパートナーへと進化しました。このガイドでは、その進化のポイントをインタラクティブに探ります。まずは、新旧AIの能力をグラフで比較してみましょう。
+            </p>
+            <p class="max-w-3xl mx-auto text-sm text-gray-500 italic mb-12">※ グラフの数値は、Geminiが動画の内容に基づいて作成した能力の目安です。</p>
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="capabilityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">新旧AI 機能比較</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12 text-center">
+                新しいNotion AIは、UIからコア機能まで、多くの点で改善されています。下のボタンをクリックして、各機能がどのように進化したか、具体的な違いを確認してみましょう。
+            </p>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/4 flex md:flex-col justify-center gap-4">
+                    <button id="btn-ui" class="comparison-button w-full text-left p-4 rounded-lg bg-white shadow-md font-semibold">UIと機能の刷新</button>
+                    <button id="btn-search" class="comparison-button w-full text-left p-4 rounded-lg bg-white shadow-md font-semibold">検索機能の強化</button>
+                    <button id="btn-edit" class="comparison-button w-full text-left p-4 rounded-lg bg-white shadow-md font-semibold">ページ編集の進化</button>
+                </div>
+                <div class="md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-6 content-fade">
+                    <div id="comparison-old" class="bg-gray-100 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold mb-4 text-gray-500">旧バージョン</h3>
+                        <div id="old-content" class="space-y-4 text-gray-700"></div>
+                    </div>
+                    <div id="comparison-new" class="bg-amber-100 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold mb-4 text-amber-800">新バージョン ✨</h3>
+                        <div id="new-content" class="space-y-4 text-amber-900"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="database" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">データベース操作の自動化</h2>
+             <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12 text-center">
+                新しいAIの最も大きな進化の一つが、データベースの自動作成機能です。プロンプトを一つ入力するだけで、構造化されたデータベースが完成します。この強力な機能のワークフローを見てみましょう。
+            </p>
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-around gap-4 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-3xl mb-3">💬</div>
+                        <h4 class="font-bold text-lg">1. プロンプト入力</h4>
+                        <p class="text-sm text-gray-600 max-w-xs">「競合分析のDBを作成して」</p>
+                    </div>
+                    <div class="text-4xl text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-3xl mb-3">🤖</div>
+                        <h4 class="font-bold text-lg">2. AIが<span class="bold-orange">DBを自動作成</span></h4>
+                        <p class="text-sm text-gray-600 max-w-xs">プロパティやサンプルも追加</p>
+                    </div>
+                     <div class="text-4xl text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center text-3xl mb-3">📊</div>
+                        <h4 class="font-bold text-lg">3. <span class="bold-orange">Web検索</span>で情報補完</h4>
+                        <p class="text-sm text-gray-600 max-w-xs">最新情報でDBをリッチに</p>
+                    </div>
+                     <div class="text-4xl text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center text-3xl mb-3">✅</div>
+                        <h4 class="font-bold text-lg">4. データベース完成</h4>
+                        <p class="text-sm text-gray-600 max-w-xs">すぐに分析を開始できる</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="limitations" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">現在の制限（今後の進化に期待）</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12 text-center">
+                新しいNotion AIは非常に強力ですが、まだ対応していない機能もいくつかあります。これらの機能は今後のアップデートで追加されることが期待されます。
+            </p>
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+                <ul class="space-y-4">
+                    <li class="flex items-start"><span class="mr-4 text-xl">🧮</span><div><span class="font-semibold">数式プロパティの操作：</span> 複雑な計算式の作成や編集はまだできません。</div></li>
+                    <li class="flex items-start"><span class="mr-4 text-xl">📋</span><div><span class="font-semibold">フォームの作成・編集：</span> Notionのフォーム機能には未対応です。</div></li>
+                    <li class="flex items-start"><span class="mr-4 text-xl">⚙️</span><div><span class="font-semibold">オートメーションの作成：</span> データベースの自動化ルールの設定は手動で行う必要があります。</div></li>
+                    <li class="flex items-start"><span class="mr-4 text-xl">🧩</span><div><span class="font-semibold">テンプレート・ロールアップ操作：</span> テンプレートの作成やロールアッププロパティの設定はできません。</div></li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="reference" class="mt-24 pt-12 border-t border-gray-200">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-900">参考文献</h2>
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="text-gray-600">
+                    本コンテンツは、以下の動画を参考に作成しています。<br>
+                    Kazuki Hayakawa 「新しくなったNotion AIを徹底比較！」URL：<a href="https://www.youtube.com/watch?v=fT4CB9m0nvI" class="text-blue-600 hover:underline" target="_blank">https://www.youtube.com/watch?v=fT4CB9m0nvI</a>
+                </p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="text-center py-8 mt-16 border-t border-gray-200">
+        <p class="text-gray-500">インタラクティブガイド by Gemini</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const comparisonData = {
+        ui: {
+            old: `
+                <ul>
+                    <li>画面右下にポップアップで表示</li>
+                    <li>テキスト生成や要約が主な機能</li>
+                    <li>単一のタスクを実行するアシスタント</li>
+                </ul>
+            `,
+            new: `
+                <ul>
+                    <li>サイドバーとして、常時アクセス可能</li>
+                    <li>ページの作成から<span class="bold-orange">DB操作</span>まで、Notion内のほとんどの作業を代行</li>
+                    <li>複数のステップを<span class="bold-orange">自律的にこなす</span>チームメイトのような存在に</li>
+                </ul>
+            `
+        },
+        search: {
+            old: `
+                <ul>
+                    <li>参照できるのはNotion内のページと連携サービス</li>
+                    <li>Web検索機能はなし</li>
+                </ul>
+            `,
+            new: `
+                <ul>
+                    <li>参照できるのはNotion内のページと連携サービス</li>
+                    <li>さらに<span class="bold-orange">Web検索機能</span>を標準搭載（オン/オフ可能）</li>
+                    <li>より広範囲の情報から、精度の高いコンテンツを作成</li>
+                </ul>
+            `
+        },
+        edit: {
+            old: `
+                <ul>
+                    <li>開いているページの<span class="bold-orange">直接編集</span>は不可</li>
+                    <li>生成された内容は手動でコピー＆ペーストする必要があった</li>
+                </ul>
+            `,
+            new: `
+                <ul>
+                    <li>開いているページを<span class="bold-orange">直接編集可能</span></li>
+                    <li>AIによる編集を「元に戻す」機能も追加</li>
+                    <li>よりシームレスで柔軟な編集フローを実現</li>
+                </ul>
+            `
+        }
+    };
+
+    const oldContent = document.getElementById('old-content');
+    const newContent = document.getElementById('new-content');
+    const comparisonButtons = document.querySelectorAll('.comparison-button');
+    const contentContainer = document.querySelector('.content-fade');
+
+    function updateComparisonContent(topic) {
+        contentContainer.classList.remove('content-fade');
+        
+        oldContent.innerHTML = comparisonData[topic].old;
+        newContent.innerHTML = comparisonData[topic].new;
+        
+        void contentContainer.offsetWidth;
+        contentContainer.classList.add('content-fade');
+
+        comparisonButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`btn-${topic}`).classList.add('active');
+    }
+
+    comparisonButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const topic = button.id.split('-')[1];
+            updateComparisonContent(topic);
+        });
+    });
+
+    updateComparisonContent('ui');
+
+    const ctx = document.getElementById('capabilityChart').getContext('2d');
+    const capabilityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['UI/UX', '情報アクセス', 'ページ編集', 'DB操作'],
+            datasets: [{
+                label: '旧AIの能力',
+                data: [40, 20, 30, 0],
+                backgroundColor: '#E5E7EB',
+                borderColor: '#D1D5DB',
+                borderWidth: 1
+            }, {
+                label: '新AIの能力',
+                data: [90, 85, 80, 75],
+                backgroundColor: '#FBBF24',
+                borderColor: '#F59E0B',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: false,
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%'
+                        }
+                    }
+                },
+                y: {
+                    stacked: false,
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.x !== null) {
+                                label += context.parsed.x + '% (概念値)';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === entry.target.id) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+    navLinks.forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>
